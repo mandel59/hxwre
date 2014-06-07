@@ -1,0 +1,11 @@
+{
+    "name": "hxwre",
+    "url": "https://github.com/mandel59/hxwre",
+    "license": "MIT",
+    "tags": ["cross", "regular expression", "string", "ds"],
+    "description": "an implementation of weighted regular expression",
+    "version": "0.0.1",
+    "releasenote": "first release",
+    "contributors": ["mandel59"],
+    "dependencies": {}
+}
