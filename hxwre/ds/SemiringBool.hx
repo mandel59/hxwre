@@ -3,8 +3,8 @@ package hxwre.ds;
 class SemiringBool {
     static var s = new SemiringBool();
 
-    public static var singleton(get, never) : SemiringBool;
-    static function get_singleton() return s;
+    public static var instance(get, never) : SemiringBool;
+    static function get_instance() return s;
 
     function new() {}
 
