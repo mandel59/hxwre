@@ -15,7 +15,7 @@ class Example1 {
     }
 
     public static function main() {
-        var w = new WRegExp(SemiringBool.instance);
+        var w = new WRegExp(SemiringBool);
 
         var rep = w.rep;
         var lit = function(c) return w.sym(function(x) return x == c);
