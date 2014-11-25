@@ -27,20 +27,15 @@ private class WReg<C,S,F:Semiring<S>> {
 class WRegExp<C,S,F:Semiring<S>> {
     var s : F;
 
-    var nil_s : WReg<C,S,F>;
-    var eps_s : WReg<C,S,F>;
-
     public function new(s : F) {
         this.s = s;
-        this.nil_s = new WReg(s.zero, s.zero, Nil);
-        this.eps_s = new WReg(s.one, s.zero, Eps);
+        this.nil = new WReg(s.zero, s.zero, Nil);
+        this.eps = new WReg(s.one, s.zero, Eps);
     }
 
-    public var nil(get, never) : WReg<C,S,F>;
-    public function get_nil() return nil_s;
+    public var nil(default, null) : WReg<C,S,F>;
 
-    public var eps(get, never) : WReg<C,S,F>;
-    public function get_eps() return eps_s;
+    public var eps(default, null) : WReg<C,S,F>;
 
     public function sym(f : C -> S) : WReg<C,S,F> {
         return new WReg(s.zero, s.zero, Sym(f));
