@@ -3,9 +3,8 @@ package hxwre;
 import hxwre.ds.Semiring;
 
 private enum WRe<C,S,F:Semiring<S>> {
-    Nil;
-    Eps;
-    Sym(f : C -> S);
+    Adv;
+    Eps(f : C -> S);
     Alt(p : WReg<C,S,F>, q : WReg<C,S,F>);
     And(p : WReg<C,S,F>, q : WReg<C,S,F>);
     Seq(p : WReg<C,S,F>, q : WReg<C,S,F>);
@@ -29,20 +28,21 @@ class WRegExp<C,S,F:Semiring<S>> {
 
     public function new(s : F) {
         this.s = s;
-        this.nil = new WReg(s.zero, s.zero, Nil);
-        this.eps = new WReg(s.one, s.zero, Eps);
+        this.adv = new WReg(s.zero, s.zero, Adv);
     }
 
-    public var nil(default, null) : WReg<C,S,F>;
+    public var adv(default, null) : WReg<C,S,F>;
 
-    public var eps(default, null) : WReg<C,S,F>;
-
-    public function sym(f : C -> S) : WReg<C,S,F> {
-        return new WReg(s.zero, s.zero, Sym(f));
+    function advM(m : S) : WReg<C,S,F> {
+        return new WReg(s.zero, m, Adv);
     }
 
-    function symFinal(f : C -> S, m : S) : WReg<C,S,F> {
-        return new WReg(s.zero, m, Sym(f));
+    public function eps(f : C -> S) : WReg<C,S,F> {
+        return new WReg(s.zero, s.zero, Eps(f));
+    }
+
+    public function epsC(f : C -> S, c : C) : WReg<C,S,F> {
+        return new WReg(f(c), s.zero, Eps(f));
     }
 
     public function alt(p : WReg<C,S,F>, q : WReg<C,S,F>) : WReg<C,S,F> {
@@ -67,9 +67,8 @@ class WRegExp<C,S,F:Semiring<S>> {
 
     public function shift(c : C, m : S, re : WReg<C,S,F>) : WReg<C,S,F> {
         return switch (re.reg) {
-            case Nil: nil;
-            case Eps: eps;
-            case Sym(f): symFinal(f, s.times(m, f(c)));
+            case Adv: advM(m);
+            case Eps(f): epsC(f, c);
             case Alt(p, q):
                 alt(shift(c, m, p), shift(c, m, q));
             case And(p, q):
@@ -78,15 +77,17 @@ class WRegExp<C,S,F:Semiring<S>> {
                 seq(shift(c, m, p),
                     shift(c, s.plus(s.times(m, p.empty), p.final), q));
             case Rep(r):
-                rep(shift(c, s.plus(m, r.final), r));
+                rep(shift(c, s.plus(r.final, m), r));
         };
     }
 
     public function match(r : WReg<C,S,F>, cs : Iterator<C>) : S {
-        if (!cs.hasNext()) return r.empty;
-        var r = shift(cs.next(), s.one, r);
-        for (c in cs) {
-            r = shift(c, s.zero, r);
+        var c = cs.next();
+        while (true) {
+            r = shift(c, s.one, r);
+            if (!cs.hasNext())
+                break;
+            c = cs.next();
         }
         return r.final;
     }
